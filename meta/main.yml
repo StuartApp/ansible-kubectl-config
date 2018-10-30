@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: "Jordi Clariana"
+  company: Stuart Delivery S.L.
+  license: None
+  min_ansible_version: 2.6
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Ubuntu
+      versions:
+        - xenial
+  galaxy_tags:
+    - kubectl
+dependencies: []

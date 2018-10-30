@@ -1,0 +1,72 @@
+---
+
+- name: Get local users home dirs
+  shell: >
+    getent passwd "{{ item }}" | cut -d: -f6
+  become: true
+  become_user: "{{ item }}"
+  register: local_users_homedirs
+  loop: "{{ kubectl_config_local_users }}"
+
+- name: Create kubectl config dir
+  file:
+    path: "{{ item.stdout }}/.kube"
+    state: directory
+    mode: 0700
+  become: true
+  become_user: "{{ item.item }}"
+  loop: "{{ local_users_homedirs.results }}"
+
+- name: Create kubectl certificates dir
+  file:
+    path: "{{ item.stdout }}/.kube/certs"
+    state: directory
+    mode: 0700
+  become: true
+  become_user: "{{ item.item }}"
+  loop: "{{ local_users_homedirs.results }}"
+
+- name: Create cluster CA certificate files
+  copy:
+    content: "{{ item.1.certificate_data }}"
+    dest: "{{ (local_users_homedirs.results | selectattr('item', 'equalto', item.0.name) |
+                   map(attribute='stdout') | list | first) }}/.kube/certs/{{ item.1.cluster }}_ca.crt"
+    mode: 0644
+  become: true
+  become_user: "{{ item.0.name }}"
+  loop: "{{ kubectl_config_ca_certificates | subelements('clusters')  }}"
+
+- name: Create cluster client certificate files
+  copy:
+    content: "{{ item.1.client_certificate }}"
+    dest: "{{ (local_users_homedirs.results | selectattr('item', 'equalto', item.0.name) |
+                   map(attribute='stdout') | list | first) }}/.kube/certs/{{ item.1.client }}.crt"
+    mode: 0644
+  become: true
+  become_user: "{{ item.0.name }}"
+  loop: "{{ kubectl_config_client_certificates | subelements('clients')  }}"
+  no_log: "{{ not kubectl_config_debug }}"
+
+- name: Create cluster client certificate key files
+  copy:
+    content: "{{ item.1.client_key }}"
+    dest: "{{ (local_users_homedirs.results | selectattr('item', 'equalto', item.0.name) |
+                   map(attribute='stdout') | list | first) }}/.kube/certs/{{ item.1.client }}.key"
+    mode: 0400
+  become: true
+  become_user: "{{ item.0.name }}"
+  loop: "{{ kubectl_config_client_certificates | subelements('clients')  }}"
+  no_log: "{{ not kubectl_config_debug }}"
+
+- name: Resolve vault secrets in kubectl_config_users
+  set_fact:
+    kubectl_config_users: "{{ kubectl_config_users }}"
+
+- name: Install .kube/config
+  template:
+    src: config.j2
+    dest: "{{ (local_users_homedirs.results | selectattr('item', 'equalto', item) |
+                   map(attribute='stdout') | list | first)  }}/.kube/config"
+    owner: "{{ item }}"
+    mode: 0600
+  loop: "{{ kubectl_config_local_users }}"

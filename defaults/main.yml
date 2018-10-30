@@ -1,0 +1,64 @@
+---
+
+# To disable `no_log`
+kubectl_config_debug: false
+
+kubectl_config_apiversion: v1
+kubectl_config_preferences: {}
+
+kubectl_config_local_users: []
+kubectl_config_current_context:
+kubectl_config_clusters: []
+kubectl_config_users: []
+kubectl_config_contexts: []
+
+kubectl_config_ca_certificates: {}
+kubectl_config_client_certificates: {}
+
+
+# Example:
+
+# kubectl_config_current_context: mycluster
+# kubectl_config_local_users:
+#   - username
+#
+# kubectl_config_clusters:
+#   username:
+#     - name: mycluster
+#       cluster:
+#         certificate-authority: certs/mycluster_ca.crt
+#         server: https://mycluster.domain.tld
+#
+# kubectl_config_users:
+#   username:
+#     - name: myuser
+#       user:
+#         client-certificate: certs/myuser.crt
+#         client-key: certs/myuser.key
+#     - name: myuser-basic-auth
+#       user:
+#         password: SuperSecret!
+#         username: admin
+#
+# kubectl_config_contexts:
+#   username:
+#     - name: mycontext
+#       context:
+#         cluster: mycluster
+#         user: myuser
+#
+# kubectl_config_ca_certificates:
+#   - name: username
+#     clusters:
+#       - cluster: mycluster
+#         certificate_data: |
+#           <CA certificate>
+#
+# kubectl_config_client_certificates:
+#   - name: username
+#     clients:
+#       - client: myuser
+#         client_certificate: |
+#           <client certificate>
+#         client_key: |
+#           <client key>

@@ -1,0 +1,19 @@
+apiVersion: {{ kubectl_config_apiversion }}
+current-context: {{ kubectl_config_current_context }}
+kind: Config
+preferences: {{ kubectl_config_preferences }}
+
+{% if kubectl_config_clusters is defined and kubectl_config_clusters is iterable %}
+clusters:
+{{ kubectl_config_clusters[item] | to_nice_yaml }}
+{% endif %}
+
+{% if kubectl_config_users is defined and kubectl_config_users is iterable %}
+users:
+{{ kubectl_config_users[item] | to_nice_yaml }}
+{% endif %}
+
+{% if kubectl_config_contexts is defined and kubectl_config_contexts is iterable %}
+contexts:
+{{ kubectl_config_contexts[item] | to_nice_yaml }}
+{% endif %}
